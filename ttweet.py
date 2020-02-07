@@ -1,7 +1,13 @@
 from socket import *
+import argparse
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument(dest="serverPort", type=int)
+options = parser.parse_args()
 
 serverMessage = "Empty Message"
-serverPort = 13402
+serverPort = options.serverPort      # 13402
 serverSocket = socket(AF_INET, SOCK_STREAM)
 
 serverSocket.bind(('', serverPort))
@@ -14,7 +20,7 @@ while True:
     response = ""
     if message[0:6] == "UPLOAD":
         serverMessage = message[6::]
-        response = "Message Uploaded Successfully"
+        response = "Message Upload Successful!"
         print("New Message: ", serverMessage)
     elif message[0:8] == "DOWNLOAD":
         response = serverMessage
