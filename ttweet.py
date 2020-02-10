@@ -14,19 +14,23 @@ serverSocket.bind(('', serverPort))
 serverSocket.listen(1)
 print('Server On. Press Ctrl + C to exit.')
 while True:
-    connectionSocket, addr = serverSocket.accept()
+    try:
+        connectionSocket, addr = serverSocket.accept()
 
-    message = connectionSocket.recv(1024).decode()
-    response = ""
-    if message[0:6] == "UPLOAD":
-        serverMessage = message[6::]
-        response = "Message Upload Successful!"
-        print("New Message: ", serverMessage)
-    elif message[0:8] == "DOWNLOAD":
-        response = serverMessage
-        print("Message downloaded")
-    else:
-        print("Error processing request")
+        message = connectionSocket.recv(1024).decode()
+        response = ""
+        if message[0:6] == "UPLOAD":
+            serverMessage = message[6::]
+            response = "Message Upload Successful!"
+            print("New Message: ", serverMessage)
+        elif message[0:8] == "DOWNLOAD":
+            response = serverMessage
+            print("Message downloaded")
+        else:
+            print("Error processing request")
 
-    connectionSocket.send(response.encode())
+        connectionSocket.send(response.encode())
+    except Exception as err:
+        connectionSocket.send(("Error processing request: " + str(err)).encode())
     connectionSocket.close()
+
