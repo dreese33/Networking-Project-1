@@ -12,7 +12,7 @@ def upload(client, message):
 def download(client):
     client.send("DOWNLOAD".encode())
     response = client.recv(1024)
-    print("Message currently stored in server: " + response.decode())
+    print("Message currently stored in server: " + "\"" + response.decode() + "\"")
 
 
 def getOptions():
@@ -35,7 +35,12 @@ def validIP(address):
 
 print("\n")
 sendMessage = True
-options = getOptions()
+
+try:
+    options = getOptions()
+except Exception as err:
+    sendMessage = False
+    print("Exception occurred: " + str(err))
 
 serverName = options.serverIP   # '127.0.0.1'
 
@@ -43,10 +48,26 @@ if not validIP(serverName):
     print("Invalid IP Address Entered. Client Exiting...")
     sendMessage = False
 
-serverPort = options.serverPort     # 13402
-clientSocket = socket(AF_INET, SOCK_STREAM)
-clientSocket.settimeout(3)
+try:
+    serverPort = options.serverPort     # 13402
+    clientSocket = socket(AF_INET, SOCK_STREAM)
+    clientSocket.settimeout(3)
+except Exception as err:
+    print("Exception occurred: " + str(err))
 
+if options.upload:
+    if options.message is not None:
+        test = options.message.strip()
+        if len(test) >= 1:
+            if len(options.message) > 150:
+                sendMessage = False
+                print("Cannot send message larger than 150 characters. Client exiting...")
+        else:
+            sendMessage = False
+            print("Message must be of at least length 1 excluding whitespace characters. Client exiting...")
+    else:
+        sendMessage = False
+        print("Please enter a message while uploading. Client exiting...")
 
 # Attempts to connect to the server
 if sendMessage:
@@ -71,13 +92,7 @@ if sendMessage:
         if options.upload and options.download:
             print("Cannot call both upload and download simultaneously...")
         elif options.upload:
-            if options.message is not None:
-                if len(options.message) <= 150:
-                    upload(clientSocket, options.message)
-                else:
-                    print("Cannot send message larger than 150 characters. Client exiting...")
-            else:
-                print("Please enter a message while uploading. Client exiting...")
+            upload(clientSocket, options.message)
         elif options.download:
             if options.message is not None:
                 print("Warning: Message " + "\'" + str(options.message) + "\'" +
